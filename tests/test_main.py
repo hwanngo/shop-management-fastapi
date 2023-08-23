@@ -1,9 +1,9 @@
 # test_main.py
 
 from fastapi.testclient import TestClient
-from main import fast_api
+from main import app
 
-client = TestClient(fast_api)
+client = TestClient(app)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------

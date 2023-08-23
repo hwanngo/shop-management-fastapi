@@ -1,7 +1,7 @@
 # services.py
 
 from sqlalchemy.orm import Session
-from models import models
+from app.models import models
 
 # TODO: Create, Update, Delete
 

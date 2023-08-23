@@ -2,12 +2,12 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Path
 from typing import List
-from data.database import OrmSession
+from app.database.database import OrmSession
 from sqlalchemy.orm import Session
-from schemas import schemas
-from services import services
+from app.services import services
+from app.schemas import schemas
 
-api_router = APIRouter()
+api = APIRouter()
 
 
 # We need to have an independent database session/connection per request, use
@@ -28,8 +28,8 @@ def get_db_session():
 
 
 # HTTP GET
-@api_router.get(
-    "/songs/",
+@api.get(
+    "/songs",
     response_model=List[schemas.Song],
     summary="Gets all songs in the collection"
 )
@@ -40,7 +40,7 @@ def get_songs(
     return songs
 
 
-@api_router.get(
+@api.get(
     "/songs/year/{year}",
     response_model=List[schemas.Song],
     summary="Gets all songs from the specified year"
@@ -51,11 +51,11 @@ def get_songs_by_year(
 ):
     songs = services.retrieve_songs_by_year(db_session, year=year)
     if not songs:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No song released on {year} found")
     return songs
 
 
-@api_router.get(
+@api.get(
     "/songs/rank/{rank}",
     response_model=schemas.Song,
     summary="Get the song with the specified rank"
