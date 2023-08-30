@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi_jwt_auth import AuthJWT
 
-from app.auth.user_token import User, Settings
+from ..auth.user_token import User, Settings
 from ..auth.auth_services import AuthService
 
 api = APIRouter()

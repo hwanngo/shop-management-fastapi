@@ -1,7 +1,7 @@
 # models.py
 
 from sqlalchemy import Column, String, Integer
-from app.database.database import Base
+from ..database.database import Base
 
 
 class Song(Base):

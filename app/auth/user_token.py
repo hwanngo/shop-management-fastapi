@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import timedelta
 
-from app.settings.configs import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_MINUTES
+from ..settings.configs import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_MINUTES
 
 
 class AccessToken(BaseModel):

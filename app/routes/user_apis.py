@@ -1,7 +1,7 @@
 # routes.py
 
 from fastapi import APIRouter
-from app.database.database import OrmSession
+from ..database.database import OrmSession
 # from app.auth.auth_services import get_current_active_user
 
 api = APIRouter()
