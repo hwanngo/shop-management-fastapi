@@ -1,61 +1,49 @@
-# routes.py
+from fastapi import APIRouter, Depends
+from fastapi_jwt_auth import AuthJWT
 
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
-
-from fastapi.security import OAuth2PasswordRequestForm
-from app.settings.configs import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.auth.auth_services import authenticate_user, create_access_token
-from app.database.database import OrmSession
-from app.auth import user_token
+from app.auth.user_token import User, Settings
+from ..auth.auth_services import AuthService
 
 api = APIRouter()
+auth_service = AuthService()
 
 
-# We need to have an independent database session/connection per request, use
-# the same session through all the request and then close it after the request
-# is finished.
-# And then a new session will be created for the next request.
-# Our dependency will create a new SQLAlchemy Session that will be used in a
-# single request, and then close it once the request is finished.
-# https://fastapi.tiangolo.com/tutorial/sql-databases/#create-a-dependency
-def get_db_session():
-    db_session = OrmSession()
-    try:
-        yield db_session
-    finally:
-        db_session.close()
+@AuthJWT.load_config
+def get_config():
+    return Settings()
 
 
-fake_users_db = {
-    "admin": {
-        "id": 1,
-        "username": "admin",
-        "email": "admin@example.com",
-        "hashed_password": "$2a$12$kvB4IR6lCN9Rz2AjLB1V0uyjz8jXtwMdxOfjcX04OfnvV.nLJpoAu",
-        "created_at": "1",
-        "updated_at": "1"
-    }
-}
-
-# TODO: HTTP POST, HTTP PUT and HTTP DELETE
+@api.post("/login")
+def login(user: User, authorize: AuthJWT = Depends()):
+    return auth_service.login(user, authorize)
 
 
-# HTTP GET
-@api.post("/auth", response_model=user_token.Token)
-async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+@api.post("/refresh")
+def refresh(authorize: AuthJWT = Depends()):
+    return auth_service.refresh(authorize)
+
+
+# @api.delete("/logout")
+# def logout(Authorize: AuthJWT = Depends()):
+#     """
+#     Because the JWT are stored in an httponly cookie now, we cannot
+#     log the user out by simply deleting the cookies in the frontend.
+#     We need the backend to send us a response to delete the cookies.
+#     """
+#     Authorize.jwt_required()
+
+#     Authorize.unset_jwt_cookies()
+#     return {"msg": "Successfully logout"}
+
+
+# @api.get("/protected")
+# def protected(Authorize: AuthJWT = Depends()):
+#     """
+#     We do not need to make any changes to our protected endpoints. They
+#     will all still function the exact same as they do when sending the
+#     JWT in via a headers instead of a cookies
+#     """
+#     Authorize.jwt_required()
+
+#     current_user = Authorize.get_jwt_subject()
+#     return {"user": current_user}

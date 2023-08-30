@@ -7,6 +7,7 @@ click
 coverage
 docopt
 fastapi
+fastapi-jwt-auth
 flake8
 greenlet
 h11

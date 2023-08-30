@@ -1,10 +1,8 @@
 # routes.py
 
-from fastapi import APIRouter, Depends
-from typing import Annotated
+from fastapi import APIRouter
 from app.database.database import OrmSession
-from app.auth import user_token
-from app.auth.auth_services import get_current_active_user
+# from app.auth.auth_services import get_current_active_user
 
 api = APIRouter()
 
@@ -26,8 +24,8 @@ def get_db_session():
 # TODO: HTTP POST, HTTP PUT and HTTP DELETE
 
 
-@api.get("/users/me", response_model=user_token.User)
-async def read_users_me(
-    current_user: Annotated[user_token.User, Depends(get_current_active_user)]
-):
-    return current_user
+# @api.get("/users/me", response_model=user_token.User)
+# async def read_users_me(
+#     current_user: Annotated[user_token.User, Depends(get_current_active_user)]
+# ):
+#     return current_user

@@ -1,91 +1,26 @@
-from datetime import datetime, timedelta
-from typing import Annotated
+from fastapi import HTTPException
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, HTTPBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from app.schemas import user_schema
-
-from app.settings.configs import SECRET_KEY, ALGORITHM
-from app.auth.user_token import TokenData, UserInDB
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from .user_token import AccessToken
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-reusable_oauth2 = HTTPBearer(scheme_name='Authorization')
+class AuthService():
+    def __init__(self) -> None:
+        pass
 
-fake_users_db = {
-    "admin": {
-        "id": 1,
-        "username": "admin",
-        "email": "admin@example.com",
-        "hashed_password": "$2a$12$kvB4IR6lCN9Rz2AjLB1V0uyjz8jXtwMdxOfjcX04OfnvV.nLJpoAu",
-        "created_at": "1",
-        "updated_at": "1"
-    }
-}
+    def login(self, user, authorize):
+        if user.username != "test" or user.password != "test":
+            raise HTTPException(status_code=401, detail="Bad username or password")
 
+        access_token = authorize.create_access_token(subject=user.username)
+        refresh_token = authorize.create_refresh_token(subject=user.username)
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+        return AccessToken(access_token=access_token, refresh_token=refresh_token)
 
+    def refresh(self, authorize):
+        authorize.jwt_refresh_token_required()
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+        current_user = authorize.get_jwt_subject()
+        new_access_token = authorize.create_access_token(subject=current_user)
 
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
-
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-async def get_current_active_user(
-    current_user: Annotated[user_schema.User, Depends(get_current_user)]
-):
-    # if current_user.disabled:
-    #     raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+        # authorize.set_access_cookies(new_access_token)
+        return AccessToken(access_token=new_access_token)

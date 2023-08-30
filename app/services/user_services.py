@@ -1,11 +1,20 @@
 # services.py
 
-from sqlalchemy.orm import Session
-from app.models import user
+from ..repos.user_repos import UserRepository
 
 # TODO: Create, Update, Delete
 
 
-# Retrieve
-def retrieve_all_users(db: Session):
-    return db.query(user.User).all()
+class UserService():
+    def __init__(self, repository: UserRepository) -> None:
+        self.repository = repository
+
+    # Retrieve
+    def retrieve_all_users(self):
+        return self.repository._retrieve_all_users()
+
+    def get_by_username(self, username: str):
+        if username != "test":
+            return None
+        else:
+            return True

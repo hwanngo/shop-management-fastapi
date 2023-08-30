@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Path
 from typing import List
+from ..utils.dependencies import login_required
+from app.auth.user_token import User
 from app.database.database import OrmSession
 from sqlalchemy.orm import Session
 from app.services import song_services
@@ -34,8 +36,12 @@ def get_db_session():
     summary="Gets all songs in the collection"
 )
 def get_songs(
-    db_session: Session = Depends(get_db_session)
+    db_session: Session = Depends(get_db_session),
+    user: User = Depends(login_required),
+    # authorize: AuthJWT = Depends()
 ):
+    # authorize.jwt_required()
+    # authorize.get_jwt_subject()
     songs = song_services.retrieve_all_songs(db_session)
     return songs
 
