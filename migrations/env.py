@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.settings.configs import SQLALCHEMY_DATABASE_URI
-from app.models import user
+from app.models import user, role, order, order_line
 from app.database.database import Base
 
 # this is the Alembic Config object, which provides
@@ -22,7 +22,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-config.set_main_option('sqlalchemy.url', SQLALCHEMY_DATABASE_URI)
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URI)
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -69,9 +69,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

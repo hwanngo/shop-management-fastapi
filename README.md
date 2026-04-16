@@ -30,6 +30,98 @@ In response to the need for efficient inventory management and invoicing for a s
 
 - **Future Plans**: As the project progresses, I intend to continue refining and expanding the application to meet the evolving needs of the small store. My goal is to provide a cost-effective, tailored solution that enhances operational efficiency and optimizes inventory management.
 
+## Development Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and Python environment handling.
+
+### Prerequisites
+
+- Python 3.10+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
+- MariaDB running locally
+
+### Setup
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd shop-management-fastapi
+
+# Sync dependencies (creates .venv automatically)
+uv sync --extra dev
+
+# Set up environment variables
+export DB_HOST=127.0.0.1
+export DB_PORT=3306
+export DB_USER=root
+export DB_PASSWORD=root
+export DB_NAME=fastapi
+export JWT_SECRET_KEY=your-secret-key-here
+```
+
+### Running the Application
+
+```bash
+# Run development server with auto-reload
+uv run uvicorn main:app --reload
+
+# The API will be available at:
+# - API Docs (Swagger UI): http://localhost:8000/api/docs
+# - OpenAPI Schema: http://localhost:8000/api/openapi.json
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+uv run pytest -v
+
+# Run with coverage
+uv run pytest --cov=./ --cov-report=xml
+
+# Run specific test file
+uv run pytest tests/test_main.py -v
+```
+
+### Linting
+
+```bash
+# Run flake8
+uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+# Run with warnings
+uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+```
+
+### Database Migrations
+
+```bash
+# Create new migration
+uv run alembic revision --autogenerate -m "description"
+
+# Apply migrations
+uv run alembic upgrade head
+
+# Downgrade
+uv run alembic downgrade -1
+```
+
+### Managing Dependencies
+
+```bash
+# Add production dependency
+uv add <package-name>
+
+# Add development dependency
+uv add --dev <package-name>
+
+# Update all dependencies
+uv sync --upgrade
+
+# Update lock file after manual pyproject.toml changes
+uv lock
+```
+
 ## Conclusion
 
 This project showcases my skills in Python programming, web development using FastAPI, database design and management with MariaDB, and security implementation through JWT-based authentication. It reflects my commitment to delivering practical and cost-effective solutions for small businesses and my dedication to ongoing professional development.
